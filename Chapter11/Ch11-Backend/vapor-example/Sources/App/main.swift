@@ -324,6 +324,52 @@ drop.post("updateTodo") { request in
     return try JSON(node: ["message": message])
 }
 
+/// Login
+drop.get("login") { request in
+    guard let userName = request.headers["userName"],
+        let password = request.headers["password"]
+        else {
+            return try JSON(node: ["success": false])
+    }
+    
+    var resultJSON = [String: Bool]()
+    
+    let users = UserStore.sharedInstance
+    if let user = users.find(username: userName) {
+        if user.password == password {
+            resultJSON = ["success": true]
+        } else {
+            resultJSON = ["success": false]
+        }
+    } else {
+        resultJSON = ["success": false]
+    }
+    
+    return try JSON(node: resultJSON)
+}
+
+/// Register
+drop.post("register") { request in
+    guard let username = request.headers["username"],
+        let password = request.headers["password"]
+        else {
+            return try JSON(node: ["success": "false", "message": "Please include mandatory parameters"])
+    }
+    
+    
+    let userItem = User(username: username, password: password)
+    
+    var resultJSON = [String: String]()
+    
+    let users = UserStore.sharedInstance
+    if users.addItem(item: userItem) {
+        return try JSON(node: ["success": "true", "message": "Registration successful"])
+    } else {
+        return try JSON(node: ["success": "false", "message": "Username already exists"])
+    }
+    return try JSON(node: resultJSON)
+}
+
 /* Swift 3 Functional Programming - End */
 
 
